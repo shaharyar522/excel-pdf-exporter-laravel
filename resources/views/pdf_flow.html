@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    pre {
+      background: #f9f9f9;
+      border-left: 5px solid #e74c3c;
+      padding: 15px;
+      overflow-x: auto;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+    }
+
+    code {
+      color: #333;
+      white-space: pre-wrap;
+    }
+
+    h1, h2, h3 {
+      color: #2c3e50;
+      margin-top: 30px;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1>📕 Laravel PDF Export Guide</h1>
+
+    <h2>Step 1: Install DomPDF</h2>
+    <pre><code>composer require barryvdh/laravel-dompdf</code></pre>
+
+    <h2>Step 2: Add Button in Blade</h2>
+    <pre><code>
+&lt;a href="{{ route('export.pdf') }}" class="btn btn-danger btn-export btn-pdf"&gt;
+  &lt;i class="bi bi-file-earmark-pdf"&gt;&lt;/i&gt; Download to PDF
+&lt;/a&gt;
+    </code></pre>
+
+    <h2>Step 3: Add Route and Controller</h2>
+    <p><strong>📄 Route (in <code>web.php</code>):</strong></p>
+    <pre><code>
+use App\Http\Controllers\PDFExportController;
+
+Route::get('/export-pdf', [PDFExportController::class, 'export'])->name('export.pdf');
+    </code></pre>
+
+    <p><strong>📁 Controller: <code>app/Http/Controllers/PDFExportController.php</code></strong></p>
+    <pre><code>
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\StudentRecord;
+use PDF; // Important for DomPDF
+
+class PDFExportController extends Controller
+{
+    public function export()
+    {
+        $students = StudentRecord::all();
+
+        $pdf = PDF::loadView('pdf.students', compact('students'));
+
+        return $pdf->download('student_records.pdf');
+    }
+}
+    </code></pre>
+
+    <h2>Step 4: Create Blade View for PDF</h2>
+    <p><strong>📁 File: <code>resources/views/pdf/students.blade.php</code></strong></p>
+    <pre><code>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Student Records&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: left; font-size: 12px; }
+        th { background-color: #f2f2f2; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;h2&gt;Student Records&lt;/h2&gt;
+
+    &lt;table&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Email&lt;/th&gt;
+                &lt;th&gt;Class&lt;/th&gt;
+                &lt;th&gt;Roll Number&lt;/th&gt;
+                &lt;th&gt;Marks&lt;/th&gt;
+                &lt;th&gt;Gender&lt;/th&gt;
+                &lt;th&gt;Date of Birth&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @foreach($students as $student)
+            &lt;tr&gt;
+                &lt;td&gt;{{ $student-&gt;name }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;email }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;class }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;roll_number }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;marks }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;gender }}&lt;/td&gt;
+                &lt;td&gt;{{ $student-&gt;dob }}&lt;/td&gt;
+            &lt;/tr&gt;
+            @endforeach
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+    </code></pre>
+
+    <hr>
+
+    <p><strong>📝 Tips:</strong></p>
+    <ul>
+      <li>Make sure you run <code>composer dump-autoload</code> after installing new packages.</li>
+      <li>Ensure the <code>PDF</code> alias is configured (Laravel auto-registers it in most cases).</li>
+      <li>Keep your PDF view simple and CSS inline. DomPDF doesn’t support external CSS files.</li>
+      <li>You can change the file name to whatever you want in <code>$pdf-&gt;download()</code>.</li>
+    </ul>
+  </div>
+</body>
+</html>

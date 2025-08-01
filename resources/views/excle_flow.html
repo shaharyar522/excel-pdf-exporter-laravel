@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    pre {
+        background: #f9f9f9;
+        border-left: 5px solid #4caf50;
+        padding: 15px;
+        overflow-x: auto;
+        font-family: Consolas, monospace;
+        font-size: 14px;
+    }
+
+    code {
+        color: #333;
+        white-space: pre-wrap;
+    }
+
+    h1, h2, h3 {
+        color: #2c3e50;
+        margin-top: 30px;
+    }
+
+    ul {
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1>📘 Laravel Excel Export Guide</h1>
+
+
+    <h2>Step 1: Install Laravel Excel Package</h2>
+    <pre><code>composer require maatwebsite/excel</code></pre>
+
+
+
+
+    <h2>Step 2: Create Export File</h2>
+    <pre><code>php artisan make:export StudentsExport --model=StudentRecord</code></pre>
+    <p><strong>Note:</strong> Replace <code>StudentRecord</code> with the model name of the table you want to export.</p>
+
+
+    <h2>Step 3: Add Logic to Export File</h2>
+    <p>📁 File: <code>app/Exports/StudentsExport.php</code></p>
+
+    <h3>Option 1: Export All Fields</h3>
+    <pre><code>
+namespace App\Exports;
+
+use App\Models\StudentRecord;
+use Maatwebsite\Excel\Concerns\FromCollection;
+
+class StudentsExport implements FromCollection
+{
+    public function collection()
+    {
+        return StudentRecord::all();
+    }
+}
+    </code></pre>
+
+    <h3>Option 2: Export Selected Fields with Headings</h3>
+    <pre><code>
+namespace App\Exports;
+
+use App\Models\StudentRecord;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+
+class StudentsExport implements FromCollection, WithHeadings
+{
+    public function collection()
+    {
+        return StudentRecord::select('name', 'email', 'class', 'roll_number', 'marks', 'gender', 'dob')->get();
+    }
+
+    public function headings(): array
+    {
+        return [
+            'Name',
+            'Email',
+            'Class',
+            'Roll Number',
+            'Marks',
+            'Gender',
+            'Date of Birth',
+        ];
+    }
+}
+    </code></pre>
+
+    <h2>Step 4: Add Route</h2>
+    <pre><code>
+use App\Exports\StudentsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+Route::get('/export-students', function () {
+    return Excel::download(new StudentsExport, 'student_records.xlsx');
+})->name('export.students');
+    </code></pre>
+
+    <h2>Step 5: Export Button in Blade</h2>
+    <pre><code>
+&lt;a href="{{ route('export.students') }}" class="btn btn-success"&gt;
+    &lt;i class="bi bi-file-earmark-excel"&gt;&lt;/i&gt; Export to Excel
+&lt;/a&gt;
+    </code></pre>
+
+    <hr>
+
+    <p><strong>📝 Tips:</strong></p>
+    <ul>
+        <li>Use <code>WithHeadings</code> for better formatted Excel files.</li>
+        <li>You can change the file name to anything: <code>student_records.xlsx</code>.</li>
+        <li>Make sure to import necessary Excel and Model namespaces.</li>
+    </ul>
+</div>
+</body>
+</html>
+
+
+
+
+
